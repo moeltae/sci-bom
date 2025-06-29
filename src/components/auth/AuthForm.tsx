@@ -1,6 +1,11 @@
-
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,10 +20,11 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // TODO(mvp): add authentication
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate authentication
     setTimeout(() => {
       setIsLoading(false);
@@ -44,7 +50,7 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="signin">
             <form onSubmit={handleAuth} className="space-y-4">
               <div className="space-y-2">
@@ -65,7 +71,7 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
               </Button>
             </form>
           </TabsContent>
-          
+
           <TabsContent value="signup">
             <form onSubmit={handleAuth} className="space-y-4">
               <div className="space-y-2">
@@ -74,7 +80,11 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="institution">Institution</Label>
-                <Input id="institution" placeholder="University Research Lab" required />
+                <Input
+                  id="institution"
+                  placeholder="University Research Lab"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-email">Email</Label>

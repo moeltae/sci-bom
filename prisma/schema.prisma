@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Experiment {
+  id            String   @id @default(cuid())
+  name          String
+  description   String
+  status        String   @default("draft") // "active", "completed", "draft"
+  estimatedCost Float
+  actualCost    Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  bomItems      BomItem[]
+  
+  @@map("experiments")
+}
+
+model BomItem {
+  id            String   @id @default(cuid())
+  name          String
+  quantity      Int
+  unit          String
+  estimatedCost Float?
+  supplier      String?
+  catalog       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  experimentId  String
+  experiment    Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  
+  @@map("bom_items")
+}

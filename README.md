@@ -1,8 +1,12 @@
 # Sci-Bom
 
+Running it locally:
+
 ```sh
+# Install dependencies
 bun i
 
+# Run the web app
 npm run dev
 ```
 
