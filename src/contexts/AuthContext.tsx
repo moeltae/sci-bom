@@ -6,6 +6,7 @@ import type {
   AuthResponse,
 } from "@supabase/supabase-js";
 import { auth } from "@/lib/supabase";
+import { prisma } from "@/lib/db";
 
 interface AuthContextType {
   user: User | null;
@@ -59,6 +60,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const {
       data: { subscription },
     } = auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        try {
+          const name =
+            session.user.user_metadata?.name ||
+            session.user.user_metadata?.full_name ||
+            session.user.user_metadata?.display_name ||
+            session.user.email?.split("@")[0] ||
+            null;
+
+          // Call your Supabase Edge Function
+          await fetch(
+            "https://uhjtpjxstqbhdcvubdpc.functions.supabase.co/upsert-user",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                id: session.user.id,
+                email: session.user.email,
+                name,
+              }),
+            }
+          );
+        } catch (error) {
+          console.error("Failed to create/update user record:", error);
+        }
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);

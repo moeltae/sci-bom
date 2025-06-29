@@ -62,9 +62,10 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(email, password);
+      const { error, data } = await signUp(email, password);
+      console.log(error, data);
 
-      if (error) {
+      if (error || data.user == null) {
         toast({
           title: "Sign up failed",
           description: error.message,
