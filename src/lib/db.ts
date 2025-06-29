@@ -11,9 +11,10 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 export interface CreateExperimentData {
   name: string;
   description: string;
-  status?: string;
+  status?: "draft" | "active" | "completed";
   estimatedCost: number;
   actualCost?: number;
+  userId: string;
 }
 
 export interface CreateBomItemData {
@@ -31,7 +32,7 @@ export class DatabaseService {
     return await prisma.experiment.create({
       data,
       include: {
-        bomItems: true,
+        items: true,
       },
     });
   }
@@ -39,7 +40,7 @@ export class DatabaseService {
   static async getExperiments() {
     return await prisma.experiment.findMany({
       include: {
-        bomItems: true,
+        items: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -51,20 +52,20 @@ export class DatabaseService {
     return await prisma.experiment.findUnique({
       where: { id },
       include: {
-        bomItems: true,
+        items: true,
       },
     });
   }
 
   static async updateExperiment(
     id: string,
-    data: Partial<CreateExperimentData>
+    data: Partial<Omit<CreateExperimentData, "userId">>
   ) {
     return await prisma.experiment.update({
       where: { id },
       data,
       include: {
-        bomItems: true,
+        items: true,
       },
     });
   }
@@ -77,7 +78,7 @@ export class DatabaseService {
 
   // BOM Item operations
   static async createBomItem(experimentId: string, data: CreateBomItemData) {
-    return await prisma.bomItem.create({
+    return await prisma.item.create({
       data: {
         ...data,
         experimentId,
@@ -89,7 +90,7 @@ export class DatabaseService {
     experimentId: string,
     items: CreateBomItemData[]
   ) {
-    return await prisma.bomItem.createMany({
+    return await prisma.item.createMany({
       data: items.map((item) => ({
         ...item,
         experimentId,
@@ -98,7 +99,7 @@ export class DatabaseService {
   }
 
   static async getBomItems(experimentId: string) {
-    return await prisma.bomItem.findMany({
+    return await prisma.item.findMany({
       where: { experimentId },
       orderBy: {
         createdAt: "asc",
@@ -107,14 +108,14 @@ export class DatabaseService {
   }
 
   static async updateBomItem(id: string, data: Partial<CreateBomItemData>) {
-    return await prisma.bomItem.update({
+    return await prisma.item.update({
       where: { id },
       data,
     });
   }
 
   static async deleteBomItem(id: string) {
-    return await prisma.bomItem.delete({
+    return await prisma.item.delete({
       where: { id },
     });
   }
@@ -123,14 +124,14 @@ export class DatabaseService {
   static async getExperimentStats() {
     const experiments = await prisma.experiment.findMany({
       include: {
-        bomItems: true,
+        items: true,
       },
     });
 
     return experiments.map((exp) => ({
       ...exp,
-      materialCount: exp.bomItems.length,
-      totalEstimatedCost: exp.bomItems.reduce(
+      materialCount: exp.items.length,
+      totalEstimatedCost: exp.items.reduce(
         (sum, item) => sum + (item.estimatedCost || 0),
         0
       ),

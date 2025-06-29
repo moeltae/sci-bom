@@ -1,21 +1,82 @@
-
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, DollarSign, Users, TrendingUp, Plus } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  DollarSign,
+  Users,
+  TrendingUp,
+  Plus,
+  LogOut,
+} from "lucide-react";
 import { BomUploader } from "@/components/bom/BomUploader";
 import { ExperimentList } from "@/components/experiments/ExperimentList";
 import { CostAnalysis } from "@/components/analysis/CostAnalysis";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
 
   const stats = [
-    { title: "Active Experiments", value: "12", icon: FileText, color: "text-blue-600" },
-    { title: "Total Budget", value: "$45,230", icon: DollarSign, color: "text-green-600" },
-    { title: "Materials Tracked", value: "156", icon: TrendingUp, color: "text-purple-600" },
-    { title: "Team Members", value: "8", icon: Users, color: "text-orange-600" },
+    {
+      title: "Active Experiments",
+      value: "12",
+      icon: FileText,
+      color: "text-blue-600",
+    },
+    {
+      title: "Total Budget",
+      value: "$45,230",
+      icon: DollarSign,
+      color: "text-green-600",
+    },
+    {
+      title: "Materials Tracked",
+      value: "156",
+      icon: TrendingUp,
+      color: "text-purple-600",
+    },
+    {
+      title: "Team Members",
+      value: "8",
+      icon: Users,
+      color: "text-orange-600",
+    },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) {
+        toast({
+          title: "Sign out failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Signed out successfully",
+          description: "You have been signed out.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Sign out failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,16 +85,34 @@ export const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">BoM Generator</h1>
-              <p className="text-gray-600">Biotech Experiment Planning Platform</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                BoM Generator
+              </h1>
+              <p className="text-gray-600">
+                Biotech Experiment Planning Platform
+              </p>
             </div>
             <div className="flex items-center gap-4">
-              <Button onClick={() => setActiveTab("upload")} className="flex items-center gap-2">
+              <Button
+                onClick={() => setActiveTab("upload")}
+                className="flex items-center gap-2"
+              >
                 <Plus className="h-4 w-4" />
                 New Experiment
               </Button>
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                JS
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                  {user?.email?.charAt(0).toUpperCase() || "U"}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
               </div>
             </div>
           </div>
@@ -69,18 +148,26 @@ export const Dashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === "overview" && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {stats.map((stat, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
+              {stats.map((stat) => (
+                <Card key={stat.title}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                        <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                        <p className="text-sm font-medium text-gray-600">
+                          {stat.title}
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {stat.value}
+                        </p>
                       </div>
-                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                      <div
+                        className={`p-3 rounded-full bg-gray-100 ${stat.color}`}
+                      >
+                        <stat.icon className="h-6 w-6" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -91,26 +178,39 @@ export const Dashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest updates on your experiments and BoMs</CardDescription>
+                <CardDescription>
+                  Your latest experiments and updates
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { title: "Cell Culture Media BoM updated", time: "2 hours ago", type: "update" },
-                    { title: "New experiment: Protein Purification", time: "1 day ago", type: "new" },
-                    { title: "Cost analysis completed for CRISPR project", time: "2 days ago", type: "analysis" },
-                  ].map((activity, index) => (
-                    <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                      <div className={`w-3 h-3 rounded-full ${
-                        activity.type === "update" ? "bg-blue-500" :
-                        activity.type === "new" ? "bg-green-500" : "bg-purple-500"
-                      }`} />
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{activity.title}</p>
-                        <p className="text-sm text-gray-600">{activity.time}</p>
-                      </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        New experiment "CRISPR Gene Editing" created
+                      </p>
+                      <p className="text-xs text-gray-500">2 hours ago</p>
                     </div>
-                  ))}
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        Materials updated for "Protein Purification"
+                      </p>
+                      <p className="text-xs text-gray-500">1 day ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        Cost analysis completed for "Cell Culture"
+                      </p>
+                      <p className="text-xs text-gray-500">3 days ago</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
