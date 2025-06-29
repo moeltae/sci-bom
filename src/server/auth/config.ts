@@ -1,6 +1,6 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { db } from "~/server/db";
 
@@ -32,11 +32,31 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
-    DiscordProvider,
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        // This is a simple demo - in a real app you'd validate against your database
+        if (
+          credentials?.email === "demo@example.com" &&
+          credentials?.password === "demo"
+        ) {
+          return {
+            id: "1",
+            email: "demo@example.com",
+            name: "Demo User",
+          };
+        }
+        return null;
+      },
+    }),
     /**
      * ...add more providers here.
      *
-     * Most other providers require a bit more work than the Discord provider. For example, the
+     * Most other providers require a bit more work than the credentials provider. For example, the
      * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
      * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
      *
