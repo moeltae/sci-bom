@@ -1,4 +1,8 @@
 import { PrismaClient } from "../generated/prisma";
+import type {
+  ExperimentUncheckedCreateWithoutItemsInput,
+  ItemUncheckedCreateWithoutExperimentInput,
+} from "../generated/prisma";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -8,23 +12,9 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-export interface CreateExperimentData {
-  name: string;
-  description: string;
-  status?: "draft" | "active" | "completed";
-  estimatedCost: number;
-  actualCost?: number;
-  userId: string;
-}
+export type CreateExperimentData = ExperimentUncheckedCreateWithoutItemsInput;
 
-export interface CreateBomItemData {
-  name: string;
-  quantity: number;
-  unit: string;
-  estimatedCost?: number;
-  supplier?: string;
-  catalog?: string;
-}
+export type CreateBomItemData = ItemUncheckedCreateWithoutExperimentInput;
 
 export class DatabaseService {
   // Experiment operations
@@ -132,7 +122,7 @@ export class DatabaseService {
       ...exp,
       materialCount: exp.items.length,
       totalEstimatedCost: exp.items.reduce(
-        (sum, item) => sum + (item.estimatedCost || 0),
+        (sum, item) => sum + (item.estimatedCostUSD || 0),
         0
       ),
     }));

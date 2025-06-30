@@ -10,20 +10,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-interface BomItem {
-  name: string;
-  quantity: number;
-  unit: string;
-  estimatedCostUSD?: number;
-  supplier?: string;
-  catalog?: string;
-}
-
-interface CreateExperimentRequest {
-  name: string;
-  description: string;
-  items: BomItem[];
-}
+import { Experiment, ExperimentStatus } from "../../../generated/prisma";
 
 serve(async (req) => {
   // Handle CORS
@@ -69,12 +56,13 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return new Response(
-        JSON.stringify({ error: "Missing or invalid authorization header" }),
+        JSON.stringify({ error: "Missing or invalid authorization header:" }),
         {
           status: 401,
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
+            authHeader,
           },
         }
       );
@@ -181,7 +169,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    return new Response(JSON.stringify({ error }), {
       status: 500,
       headers: {
         "Content-Type": "application/json",

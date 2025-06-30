@@ -19,7 +19,7 @@ interface BomItem {
   name: string;
   quantity: number;
   unit: string;
-  estimatedCost?: number;
+  estimatedCostUSD?: number;
   supplier?: string;
   catalog?: string;
 }
@@ -65,7 +65,7 @@ export const BomUploader = () => {
           name: values[0] || `Material ${index + 1}`,
           quantity: parseInt(values[1]) || 1,
           unit: values[2] || "each",
-          estimatedCost: values[3] ? parseFloat(values[3]) : undefined,
+          estimatedCostUSD: values[3] ? parseFloat(values[3]) : undefined,
           supplier: values[4] || "TBD",
           catalog: values[5] || "TBD",
         };
@@ -107,7 +107,7 @@ export const BomUploader = () => {
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
-        estimatedCostUSD: item.estimatedCost,
+        estimatedCostUSD: item.estimatedCostUSD,
         supplier: item.supplier,
         catalog: item.catalog,
       }));
