@@ -133,8 +133,6 @@ export const BomUploader = () => {
         throw new Error(errorData.error || "Failed to save experiment");
       }
 
-      const result = await response.json();
-
       toast({
         title: "Experiment saved successfully",
         description: `"${experimentName}" has been created with ${bomData.length} materials.`,

@@ -26,6 +26,28 @@ export const auth = {
       email,
       password,
     });
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upsert-user`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+        body: JSON.stringify({
+          email,
+          id: data.user.id,
+          name: data.user.user_metadata.name,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to create user");
+    }
+
     return { data, error };
   },
 
