@@ -10,7 +10,23 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-import { Experiment, ExperimentStatus } from "../../../generated/prisma";
+import type {
+  Experiment,
+  ExperimentStatus,
+} from "../../../generated/prisma/index.js";
+
+interface CreateExperimentRequest {
+  name: string;
+  description: string;
+  items: {
+    name: string;
+    quantity: number;
+    unit: string;
+    estimatedCostUSD?: number;
+    supplier?: string;
+    catalog?: string;
+  }[];
+}
 
 serve(async (req) => {
   // Handle CORS
@@ -68,7 +84,7 @@ serve(async (req) => {
       );
     }
 
-    // Create a Supabase client with service role key
+    // Create a Supabase client for auth, not for data access
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -99,15 +115,20 @@ serve(async (req) => {
       return sum + (item.estimatedCostUSD || 0);
     }, 0);
 
+    const experimentId = crypto.randomUUID();
+
     // Create the experiment
     const { data: experiment, error: experimentError } = await supabase
       .from("experiments")
       .insert({
+        id: experimentId,
         name,
         description,
         estimatedCostUSD: totalEstimatedCost,
         userId: user.id,
         status: "draft",
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       })
       .select()
       .single();
@@ -129,7 +150,10 @@ serve(async (req) => {
     // Create the items
     const itemsWithExperimentId = items.map((item) => ({
       ...item,
-      experimentId: experiment.id,
+      id: crypto.randomUUID(),
+      experimentId,
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     }));
 
     const { data: createdItems, error: itemsError } = await supabase
@@ -140,7 +164,7 @@ serve(async (req) => {
     if (itemsError) {
       console.error("Error creating items:", itemsError);
       // If items creation fails, we should clean up the experiment
-      await supabase.from("experiments").delete().eq("id", experiment.id);
+      await supabase.from("experiments").delete().eq("id", experimentId);
 
       return new Response(JSON.stringify({ error: "Failed to create items" }), {
         status: 500,
@@ -154,10 +178,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        experiment: {
-          ...experiment,
-          items: createdItems,
-        },
+        ...experiment,
+        items: createdItems,
       }),
       {
         status: 201,
@@ -169,7 +191,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error }), {
+    return new Response(error, {
       status: 500,
       headers: {
         "Content-Type": "application/json",
@@ -178,15 +200,3 @@ serve(async (req) => {
     });
   }
 });
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/create-experiment' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Test Experiment","description":"A test experiment","items":[{"name":"Test Item","quantity":1,"unit":"each","estimatedCostUSD":10.50}]}'
-
-*/

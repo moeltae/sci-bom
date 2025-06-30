@@ -248,8 +248,8 @@ export const BomUploader = () => {
                         <td className="p-3">{item.quantity}</td>
                         <td className="p-3">{item.unit}</td>
                         <td className="p-3">
-                          {item.estimatedCost
-                            ? `$${item.estimatedCost.toFixed(2)}`
+                          {item.estimatedCostUSD
+                            ? `$${item.estimatedCostUSD.toFixed(2)}`
                             : "TBD"}
                         </td>
                       </tr>
