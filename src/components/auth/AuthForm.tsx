@@ -63,7 +63,6 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
 
     try {
       const { error, data } = await signUp(email, password);
-      console.log(error, data);
 
       if (error || data.user == null) {
         toast({
