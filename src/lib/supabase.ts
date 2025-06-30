@@ -29,6 +29,7 @@ export const auth = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          apikey: supabaseAnonKey,
         },
         body: JSON.stringify({
           email,

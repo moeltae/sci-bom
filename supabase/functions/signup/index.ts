@@ -55,7 +55,6 @@ serve(async (request: Request) => {
   console.log("context:", context);
 
   if (context instanceof Response) {
-    console.log("early return");
     return context;
   }
   return handler(context);
