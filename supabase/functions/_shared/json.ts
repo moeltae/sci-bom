@@ -1,4 +1,5 @@
-// functions/_shared/json.ts
+import { MiddlewareHandler } from "./middleware.ts";
+
 const parseJSON: MiddlewareHandler = async (context) => {
   if (context.request.method === "POST" || context.request.method === "PUT") {
     try {

@@ -18,7 +18,8 @@ interface AuthContextType {
   ) => Promise<{ data: AuthResponse["data"]; error: AuthError | null }>;
   signUp: (
     email: string,
-    password: string
+    password: string,
+    name: string
   ) => Promise<{ data: AuthResponse["data"]; error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
 }

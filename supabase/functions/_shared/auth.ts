@@ -1,5 +1,5 @@
 import getClient from "./client";
-import { MiddlewareHandler } from "./middleware";
+import { MiddlewareHandler } from "./middleware.ts";
 
 export const requireAuth: MiddlewareHandler = async (context) => {
   const authHeader = context.request.headers.get("Authorization");

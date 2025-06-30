@@ -1,4 +1,3 @@
-// functions/_shared/response.ts
 import { corsHeaders } from "./cors.ts";
 
 export const jsonResponse = (data: any, status = 200) => {

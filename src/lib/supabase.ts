@@ -20,25 +20,20 @@ export const auth = {
   // Sign up with email and password
   signUp: async (
     email: string,
-    password: string
+    password: string,
+    name: string
   ): Promise<{ data: AuthResponse["data"]; error: AuthError | null }> => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
     const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upsert-user`,
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/signup`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${data.session.access_token}`,
         },
         body: JSON.stringify({
           email,
-          id: data.user.id,
-          name: data.user.user_metadata.name,
+          password,
+          name,
         }),
       }
     );
@@ -47,6 +42,8 @@ export const auth = {
       const errorData = await response.json();
       throw new Error(errorData.error || "Failed to create user");
     }
+
+    const { data, error } = await response.json();
 
     return { data, error };
   },

@@ -1,4 +1,4 @@
-import { MiddlewareHandler } from "./middleware";
+import { MiddlewareHandler } from "./middleware.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

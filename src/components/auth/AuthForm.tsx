@@ -62,7 +62,7 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
     setIsLoading(true);
 
     try {
-      const { error, data } = await signUp(email, password);
+      const { error, data } = await signUp(email, password, name);
 
       if (error || data.user == null) {
         toast({
