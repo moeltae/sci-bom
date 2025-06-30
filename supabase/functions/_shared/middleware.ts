@@ -1,4 +1,3 @@
-// functions/_shared/middleware.ts
 export interface RequestContext {
   request: Request;
   user?: any;
