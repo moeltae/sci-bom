@@ -36,8 +36,7 @@ model Experiment {
   name          String
   description   String
   status        ExperimentStatus @default(draft)
-  estimatedCost Float
-  actualCost    Float?
+  estimatedCostUSD Float
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
@@ -54,7 +53,7 @@ model Item {
   name          String
   quantity      Int
   unit          String
-  estimatedCost Float?
+  estimatedCostUSD Float?
   supplier      String?
   catalog       String?
   createdAt     DateTime @default(now())

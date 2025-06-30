@@ -5,12 +5,26 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-console.log("Hello from Functions!");
+/// <reference types="https://deno.land/x/deno@v1.40.0/lib.deno.d.ts" />
 
 import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   const { id, email, name } = await req.json();
 
   // Create a Supabase client with service role key (from env)
@@ -24,10 +38,14 @@ serve(async (req) => {
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  return new Response(JSON.stringify({ success: true }), { status: 200 });
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 });
 
 /* To invoke locally:

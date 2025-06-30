@@ -22,37 +22,37 @@ import { CostAnalysis } from "@/components/analysis/CostAnalysis";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
+const stats = [
+  {
+    title: "Active Experiments",
+    value: "12",
+    icon: FileText,
+    color: "text-blue-600",
+  },
+  {
+    title: "Total Budget",
+    value: "$45,230",
+    icon: DollarSign,
+    color: "text-green-600",
+  },
+  {
+    title: "Materials Tracked",
+    value: "156",
+    icon: TrendingUp,
+    color: "text-purple-600",
+  },
+  {
+    title: "Team Members",
+    value: "8",
+    icon: Users,
+    color: "text-orange-600",
+  },
+];
+
 export const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { user, signOut } = useAuth();
   const { toast } = useToast();
-
-  const stats = [
-    {
-      title: "Active Experiments",
-      value: "12",
-      icon: FileText,
-      color: "text-blue-600",
-    },
-    {
-      title: "Total Budget",
-      value: "$45,230",
-      icon: DollarSign,
-      color: "text-green-600",
-    },
-    {
-      title: "Materials Tracked",
-      value: "156",
-      icon: TrendingUp,
-      color: "text-purple-600",
-    },
-    {
-      title: "Team Members",
-      value: "8",
-      icon: Users,
-      color: "text-orange-600",
-    },
-  ];
 
   const handleSignOut = async () => {
     try {
