@@ -13,63 +13,20 @@ import type {
   ExperimentStatus,
 } from "../../../generated/prisma/index-browser";
 
-const mockExperiments: Experiment[] = [
-  {
-    id: "1",
-    name: "Cell Culture Media Optimization",
-    status: "active" as ExperimentStatus,
-    estimatedCostUSD: 1250,
-    createdAt: new Date("2024-12-20"),
-    updatedAt: new Date("2024-12-20"),
-    userId: "user1",
-    description: "Testing different media formulations for HEK293 cells",
-  },
-  {
-    id: "2",
-    name: "CRISPR Cas9 Gene Editing",
-    status: "active" as ExperimentStatus,
-    estimatedCostUSD: 2800,
-    createdAt: new Date("2024-12-18"),
-    updatedAt: new Date("2024-12-18"),
-    userId: "user1",
-    description: "Materials for targeted gene knockout experiments",
-  },
-  {
-    id: "3",
-    name: "Protein Purification Protocol",
-    status: "completed" as ExperimentStatus,
-    estimatedCostUSD: 890,
-    createdAt: new Date("2024-12-15"),
-    updatedAt: new Date("2024-12-15"),
-    userId: "user1",
-    description: "His-tag protein purification using FPLC",
-  },
-  {
-    id: "4",
-    name: "Flow Cytometry Analysis",
-    status: "draft" as ExperimentStatus,
-    estimatedCostUSD: 650,
-    createdAt: new Date("2024-12-28"),
-    updatedAt: new Date("2024-12-28"),
-    userId: "user1",
-    description: "Antibodies and reagents for cell surface marker analysis",
-  },
-];
+const getStatusColor = (status: ExperimentStatus) => {
+  switch (status) {
+    case "active":
+      return "bg-green-100 text-green-800";
+    case "completed":
+      return "bg-blue-100 text-blue-800";
+    case "draft":
+      return "bg-gray-100 text-gray-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
 
 export const ExperimentList = () => {
-  const getStatusColor = (status: ExperimentStatus) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800";
-      case "completed":
-        return "bg-blue-100 text-blue-800";
-      case "draft":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div>

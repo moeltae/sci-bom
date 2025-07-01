@@ -1,4 +1,3 @@
-import getClient from "./client";
 import { MiddlewareHandler } from "./middleware.ts";
 
 export const requireAuth: MiddlewareHandler = async (context) => {
@@ -7,7 +6,7 @@ export const requireAuth: MiddlewareHandler = async (context) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const supabase = getClient(context);
+  const supabase = context.supabase;
 
   const {
     data: { user },
