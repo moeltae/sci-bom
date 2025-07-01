@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import { Demo } from "./pages/Demo";
 import ErrorBoundary from "./components/ui/error-boundary";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,14 @@ const App = () => (
               element={
                 <ErrorBoundary>
                   <Index />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/demo"
+              element={
+                <ErrorBoundary>
+                  <Demo />
                 </ErrorBoundary>
               }
             />

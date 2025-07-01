@@ -9,6 +9,9 @@ interface ExperimentItem {
   estimatedCostUSD: number;
   supplier: string;
   catalog: string;
+  thermoFisherPrice?: number;
+  thermoFisherCatalog?: string;
+  analysisStatus?: 'pending' | 'completed';
 }
 
 interface Experiment {

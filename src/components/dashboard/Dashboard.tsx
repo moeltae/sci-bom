@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { BomUploader } from "@/components/bom/BomUploader";
 import { ExperimentList } from "@/components/experiments/ExperimentList";
+import { ExperimentCreation } from "@/components/experiments/ExperimentCreation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -93,7 +94,7 @@ export const Dashboard = () => {
             </div>
             <div className="flex items-center gap-4">
               <Button
-                onClick={() => setActiveTab("upload")}
+                onClick={() => setActiveTab("create")}
                 className="flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
@@ -125,7 +126,7 @@ export const Dashboard = () => {
             {[
               { id: "overview", label: "Overview" },
               { id: "experiments", label: "Experiments" },
-              { id: "upload", label: "Upload BoM" },
+              { id: "create", label: "Create Experiment" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -175,7 +176,11 @@ export const Dashboard = () => {
         )}
 
         {activeTab === "experiments" && <ExperimentList />}
-        {activeTab === "upload" && <BomUploader />}
+        {activeTab === "create" && (
+          <BomUploader 
+            onExperimentCreated={() => setActiveTab("experiments")}
+          />
+        )}
       </main>
     </div>
   );

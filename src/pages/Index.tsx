@@ -6,10 +6,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, DollarSign, Users, TrendingUp } from "lucide-react";
+import { Upload, FileText, DollarSign, Users, TrendingUp, Eye } from "lucide-react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -40,6 +41,14 @@ const Index = () => {
             </p>
           </div>
           <AuthForm onAuthenticated={() => {}} />
+          <div className="mt-6 text-center">
+            <Link to="/demo">
+              <Button variant="outline" className="flex items-center gap-2 mx-auto">
+                <Eye className="h-4 w-4" />
+                View UI Demo
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
