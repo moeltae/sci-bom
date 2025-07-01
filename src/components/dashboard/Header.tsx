@@ -1,7 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import type { User } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+function AccountCircle({ user }: { user: User }): JSX.Element {
+  const navigate = useNavigate();
+
+  return (
+    <Button
+      className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold"
+      onClick={() => navigate("/account")}
+    >
+      {user?.email?.charAt(0).toUpperCase() || "U"}
+    </Button>
+  );
+}
 
 export default function Header(): JSX.Element {
   const { user, signOut } = useAuth();
@@ -42,9 +57,8 @@ export default function Header(): JSX.Element {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                {user?.email?.charAt(0).toUpperCase() || "U"}
-              </div>
+              <AccountCircle user={user} />
+
               <Button
                 variant="outline"
                 size="sm"
