@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { Demo } from "./pages/Demo";
+import Account from "./pages/Account";
 import ErrorBoundary from "./components/ui/error-boundary";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,14 @@ const App = () => (
               element={
                 <ErrorBoundary>
                   <Demo />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <ErrorBoundary>
+                  <Account />
                 </ErrorBoundary>
               }
             />
