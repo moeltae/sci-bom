@@ -16,21 +16,7 @@ import {
 import { useExperiments } from "@/hooks/use-experiments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExperimentDetail } from "./ExperimentDetail";
-
-const formatExperimentStatus = (status: ExperimentStatus) => {
-  switch (status) {
-    case "completed":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "analyzing":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "failed":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "submitted":
-      return "bg-gray-100 text-gray-800 border-gray-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
-};
+import { getStatusBadgeStyles, getExperimentCardStyles } from "@/lib/experiment-styles";
 
 const getStatusIcon = (status: ExperimentStatus) => {
   switch (status) {
@@ -49,16 +35,14 @@ const getStatusIcon = (status: ExperimentStatus) => {
 
 function ExperimentCard({ experiment, onViewDetails }: { experiment: Experiment; onViewDetails: (experiment: Experiment) => void }) {
   return (
-    <Card key={experiment.id} className={`hover:shadow-md transition-shadow ${
-      experiment.status === 'analyzing' ? 'ring-2 ring-blue-200 bg-blue-50' : ''
-    }`}>
+    <Card key={experiment.id} className={getExperimentCardStyles(experiment.status)}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <CardTitle className="text-xl">{experiment.name}</CardTitle>
             <CardDescription>{experiment.description}</CardDescription>
           </div>
-          <Badge className={`${formatExperimentStatus(experiment.status)} flex items-center gap-1`}>
+          <Badge className={getStatusBadgeStyles(experiment.status)}>
             {getStatusIcon(experiment.status)}
             {experiment.status}
           </Badge>

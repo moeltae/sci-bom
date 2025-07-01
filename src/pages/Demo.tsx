@@ -5,6 +5,7 @@ import { ExperimentCreation } from "@/components/experiments/ExperimentCreation"
 import { ExperimentList } from "@/components/experiments/ExperimentList";
 import { ExperimentDetail } from "@/components/experiments/ExperimentDetail";
 import { ArrowLeft, Play, Code, Eye } from "lucide-react";
+import { getStatusBadgeStylesFromString } from "@/lib/experiment-styles";
 
 // Mock experiment data for demo
 const mockExperiments = [
@@ -248,21 +249,6 @@ function ExperimentCard({ experiment, onViewDetails }: {
     }
   };
 
-  const formatExperimentStatus = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "analyzing":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "failed":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "submitted":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   return (
     <Card key={experiment.id} className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -271,7 +257,7 @@ function ExperimentCard({ experiment, onViewDetails }: {
             <CardTitle className="text-xl">{experiment.name}</CardTitle>
             <CardDescription>{experiment.description}</CardDescription>
           </div>
-          <Badge className={`${formatExperimentStatus(experiment.status)} flex items-center gap-1`}>
+          <Badge className={getStatusBadgeStylesFromString(experiment.status)}>
             {getStatusIcon(experiment.status)}
             {experiment.status}
           </Badge>

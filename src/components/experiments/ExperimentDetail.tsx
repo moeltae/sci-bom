@@ -29,6 +29,7 @@ import {
   Experiment,
   ExperimentStatus,
 } from "../../../generated/prisma/index-browser";
+import { getStatusBadgeStyles } from "@/lib/experiment-styles";
 
 interface ExperimentDetailProps {
   experiment: Experiment;
@@ -47,21 +48,6 @@ const getStatusIcon = (status: ExperimentStatus) => {
       return <Clock className="h-4 w-4" />;
     default:
       return <Clock className="h-4 w-4" />;
-  }
-};
-
-const formatExperimentStatus = (status: ExperimentStatus) => {
-  switch (status) {
-    case "completed":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "analyzing":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "failed":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "submitted":
-      return "bg-gray-100 text-gray-800 border-gray-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 };
 
@@ -96,7 +82,7 @@ export const ExperimentDetail = ({ experiment, onClose }: ExperimentDetailProps)
           <p className="text-gray-600 mt-2">{experiment.description}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className={`${formatExperimentStatus(experiment.status)} flex items-center gap-1`}>
+          <Badge className={getStatusBadgeStyles(experiment.status)}>
             {getStatusIcon(experiment.status)}
             {experiment.status}
           </Badge>
@@ -186,7 +172,7 @@ export const ExperimentDetail = ({ experiment, onClose }: ExperimentDetailProps)
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Status:</span>
-                      <Badge className={`${formatExperimentStatus(experiment.status)} flex items-center gap-1`}>
+                      <Badge className={getStatusBadgeStyles(experiment.status)}>
                         {getStatusIcon(experiment.status)}
                         {experiment.status}
                       </Badge>
