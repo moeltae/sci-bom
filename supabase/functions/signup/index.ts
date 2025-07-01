@@ -52,6 +52,8 @@ const handler = async (context) => {
     return errorResponse(error.message);
   }
 
+  console.log("Created user");
+
   // Return session data along with user data
   return jsonResponse({
     user: userData,

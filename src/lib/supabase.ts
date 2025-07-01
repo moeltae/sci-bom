@@ -15,6 +15,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Custom type for our Edge Function signup response
+export interface CustomSignUpResponse {
+  user: User | null;
+  session: Session | null;
+  success: boolean;
+}
+
 // Auth helper functions
 export const auth = {
   // Sign up with email and password
@@ -23,7 +30,7 @@ export const auth = {
     password: string,
     name: string,
     institution: string
-  ): Promise<{ data: AuthResponse["data"]; error: AuthError | null }> => {
+  ): Promise<{ data: CustomSignUpResponse; error: AuthError | null }> => {
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/signup`,
       {
@@ -46,12 +53,12 @@ export const auth = {
       throw new Error(errorData.error || "Failed to create user");
     }
 
-    const { data, error } = await response.json();
+    const responseData = await response.json();
 
     // If we have session data from the Edge Function, set it in the Supabase client
-    if (data?.session) {
+    if (responseData?.session) {
       const { error: setSessionError } = await supabase.auth.setSession(
-        data.session
+        responseData.session
       );
       if (setSessionError) {
         console.error("Failed to set session:", setSessionError);
@@ -59,7 +66,7 @@ export const auth = {
       }
     }
 
-    return { data, error };
+    return { data: responseData, error: null };
   },
 
   // Sign in with email and password

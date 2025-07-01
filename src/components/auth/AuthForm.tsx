@@ -64,7 +64,6 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
 
     try {
       const { error, data } = await signUp(email, password, name, institution);
-      console.log(error, data);
 
       if (error) {
         toast({
@@ -77,7 +76,8 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
           title: "Account created!",
           description: "Welcome! Your account has been created successfully.",
         });
-        if (data.session) {
+        // The session is directly in data.session from the Edge Function response
+        if (data?.session) {
           onAuthenticated();
         }
       }

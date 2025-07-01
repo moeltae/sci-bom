@@ -5,8 +5,7 @@ import type {
   AuthError,
   AuthResponse,
 } from "@supabase/supabase-js";
-import { auth } from "@/lib/supabase";
-import { prisma } from "@/lib/db";
+import { auth, type CustomSignUpResponse } from "@/lib/supabase";
 
 interface AuthContextType {
   user: User | null;
@@ -21,7 +20,7 @@ interface AuthContextType {
     password: string,
     name: string,
     institution: string
-  ) => Promise<{ data: AuthResponse["data"]; error: AuthError | null }>;
+  ) => Promise<{ data: CustomSignUpResponse; error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
 }
 

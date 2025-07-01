@@ -1,6 +1,6 @@
 export interface RequestContext {
   request: Request;
-  user?: any;
+  user?: Record<string, unknown>;
   params?: Record<string, string>;
 }
 
@@ -18,11 +18,11 @@ export async function getContext(
 
   for (const middleware of middlewares) {
     const result = await middleware(context);
-    // TODO: put this back in
-    // if (result instanceof Response) {
-    //   console.log(`Early exit from ${middleware.name}`);
-    //   return result; // Early return for auth failures, etc.
-    // }
+    // TODO: put this back
+    if (result instanceof Response) {
+      console.log(`Early exit from ${middleware.name}`);
+      return result; // Early return for auth failures, etc.
+    }
     context = { ...context, ...result };
   }
 
