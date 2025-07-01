@@ -9,11 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Upload, 
-  FileText, 
-  AlertCircle
-} from "lucide-react";
+import { Upload, FileText, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -31,7 +27,9 @@ interface ExperimentCreationProps {
   onExperimentCreated?: () => void;
 }
 
-export const ExperimentCreation = ({ onExperimentCreated }: ExperimentCreationProps) => {
+export const ExperimentCreation = ({
+  onExperimentCreated,
+}: ExperimentCreationProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [bomData, setBomData] = useState<BomItem[]>([]);
   const [experimentName, setExperimentName] = useState("");
@@ -57,10 +55,10 @@ export const ExperimentCreation = ({ onExperimentCreated }: ExperimentCreationPr
 
   const processCsvFile = async (csvFile: File) => {
     setIsProcessing(true);
-    
+
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     const text = await csvFile.text();
     const lines = text.split("\n");
     const headers = lines[0].split(",").map((h) => h.trim());
@@ -112,7 +110,7 @@ export const ExperimentCreation = ({ onExperimentCreated }: ExperimentCreationPr
     setIsSaving(true);
 
     // Simulate saving delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     toast({
       title: "Experiment created successfully!",
@@ -248,7 +246,7 @@ export const ExperimentCreation = ({ onExperimentCreated }: ExperimentCreationPr
                   className="flex items-center gap-2"
                 >
                   <FileText className="h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save Experiment BoM"}
+                  {isSaving ? "Submitting..." : "Submit Experiment BoM"}
                 </Button>
               </div>
             </div>
@@ -257,4 +255,4 @@ export const ExperimentCreation = ({ onExperimentCreated }: ExperimentCreationPr
       </Card>
     </div>
   );
-}; 
+};

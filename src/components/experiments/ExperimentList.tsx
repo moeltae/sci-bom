@@ -56,6 +56,7 @@ function ExperimentCard({
     <Card
       key={experiment.id}
       className={getExperimentCardStyles(experiment.status)}
+      onClick={() => onViewDetails(experiment)}
     >
       <CardHeader>
         <div className="flex items-start justify-between">
@@ -106,9 +107,6 @@ function ExperimentCard({
             onClick={() => onViewDetails(experiment)}
           >
             View Details
-          </Button>
-          <Button variant="outline" size="sm">
-            Cost Analysis
           </Button>
         </div>
       </CardContent>
