@@ -1,12 +1,17 @@
 import {
   AuthenticatedRequestContext,
   getAuthenticatedContext,
+  getContext,
 } from "../_shared/middleware.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 import { jsonResponse, errorResponse } from "../_shared/response.ts";
 import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 import nullThrows from "https://esm.sh/nullthrows";
+import { requireAuth } from "../_shared/auth.ts";
+import { cors } from "../_shared/cors.ts";
+import parseJSON from "../_shared/json.ts";
+import { withSupabase } from "../_shared/supabase.ts";
 
 type ExperimentItem = {
   name: string;
@@ -101,6 +106,8 @@ const handler = async (context: AuthenticatedRequestContext) => {
   try {
     const { experiment, createdItems } = await createExperiment(context);
 
+    // start background task here
+
     return jsonResponse({ success: true, ...experiment, items: createdItems });
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -109,7 +116,16 @@ const handler = async (context: AuthenticatedRequestContext) => {
 };
 
 serve(async (request: Request) => {
-  const context = await getAuthenticatedContext(request);
+  const contextOrResponse = await getContext(request, [
+    cors,
+    parseJSON,
+    withSupabase,
+    requireAuth,
+  ]);
 
-  return handler(context);
+  if (contextOrResponse instanceof Response) {
+    return contextOrResponse;
+  }
+
+  return handler(contextOrResponse as AuthenticatedRequestContext);
 });

@@ -10,7 +10,7 @@ import {
 export interface RequestContext {
   request: Request;
   params?: Record<string, string>;
-  body?: any;
+  body?: unknown;
 }
 
 export interface AuthenticatedRequestContext extends RequestContext {
@@ -27,31 +27,22 @@ export type Handler = (context: RequestContext) => Promise<Response>;
 export async function getContext(
   request: Request,
   middlewares: MiddlewareHandler[]
-): Promise<RequestContext> {
+): Promise<RequestContext | Response> {
   let context: RequestContext = { request };
 
   for (const middleware of middlewares) {
+    console.log(`Executing middleware: ${middleware.name}`);
     const result = await middleware(context);
     if (result instanceof Response) {
-      console.log(`Early exit from ${middleware.name}`);
+      console.log(`Early exit from ${middleware.name || "anonymous"}`);
       return result; // Early return for auth failures, etc.
     }
     context = { ...context, ...result };
+    console.log(
+      `Context after ${middleware.name || "anonymous"}:`,
+      Object.keys(context)
+    );
   }
 
   return context;
-}
-
-export async function getAuthenticatedContext(
-  request: Request
-): Promise<AuthenticatedRequestContext> {
-  const context = await getContext(request, [
-    cors,
-    parseJSON,
-    withSupabase,
-    requireAuth,
-  ]);
-
-  // TODO: Type this better
-  return context as AuthenticatedRequestContext;
 }
