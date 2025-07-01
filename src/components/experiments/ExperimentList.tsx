@@ -8,7 +8,15 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, DollarSign, Calendar, CheckCircle, Loader2, AlertCircle, Clock } from "lucide-react";
+import {
+  FileText,
+  DollarSign,
+  Calendar,
+  CheckCircle,
+  Loader2,
+  AlertCircle,
+  Clock,
+} from "lucide-react";
 import {
   Experiment,
   ExperimentStatus,
@@ -16,7 +24,11 @@ import {
 import { useExperiments } from "@/hooks/use-experiments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExperimentDetail } from "./ExperimentDetail";
-import { getStatusBadgeStyles, getExperimentCardStyles } from "@/lib/experiment-styles";
+import {
+  getStatusBadgeStyles,
+  getExperimentCardStyles,
+} from "@/lib/experiment-styles";
+import formatError from "@/lib/formatError";
 
 const getStatusIcon = (status: ExperimentStatus) => {
   switch (status) {
@@ -33,9 +45,18 @@ const getStatusIcon = (status: ExperimentStatus) => {
   }
 };
 
-function ExperimentCard({ experiment, onViewDetails }: { experiment: Experiment; onViewDetails: (experiment: Experiment) => void }) {
+function ExperimentCard({
+  experiment,
+  onViewDetails,
+}: {
+  experiment: Experiment;
+  onViewDetails: (experiment: Experiment) => void;
+}) {
   return (
-    <Card key={experiment.id} className={getExperimentCardStyles(experiment.status)}>
+    <Card
+      key={experiment.id}
+      className={getExperimentCardStyles(experiment.status)}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-2">
@@ -67,18 +88,20 @@ function ExperimentCard({ experiment, onViewDetails }: { experiment: Experiment;
           </div>
         </div>
 
-        {experiment.status === 'analyzing' && (
+        {experiment.status === "analyzing" && (
           <div className="mb-3 p-3 bg-blue-100 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-blue-800">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>AI analysis in progress... This may take a few minutes.</span>
+              <span>
+                AI analysis in progress... This may take a few minutes.
+              </span>
             </div>
           </div>
         )}
-        
+
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => onViewDetails(experiment)}
           >
@@ -115,14 +138,15 @@ function SkeletonCard(): JSX.Element {
 }
 
 export const ExperimentList = () => {
-  const { experiments, loading, error } = useExperiments();
-  const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null);
+  const { experiments, isPending, error } = useExperiments();
+  const [selectedExperiment, setSelectedExperiment] =
+    useState<Experiment | null>(null);
 
   return (
     <div className="space-y-6">
       {selectedExperiment ? (
-        <ExperimentDetail 
-          experiment={selectedExperiment} 
+        <ExperimentDetail
+          experiment={selectedExperiment}
           onClose={() => setSelectedExperiment(null)}
         />
       ) : (
@@ -137,19 +161,19 @@ export const ExperimentList = () => {
           </div>
 
           <div className="grid gap-6">
-            {loading ? (
+            {isPending ? (
               <div className="space-y-4">
                 {[...Array(3)].map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
               </div>
             ) : error ? (
-              <p>{error}</p>
+              <p>{formatError(error)}</p>
             ) : (
               experiments.map((experiment) => (
-                <ExperimentCard 
+                <ExperimentCard
                   key={experiment.id}
-                  experiment={experiment} 
+                  experiment={experiment}
                   onViewDetails={setSelectedExperiment}
                 />
               ))
