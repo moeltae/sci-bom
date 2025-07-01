@@ -1,13 +1,11 @@
 import {
   AuthenticatedRequestContext,
-  getAuthenticatedContext,
   getContext,
 } from "../_shared/middleware.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 import { jsonResponse, errorResponse } from "../_shared/response.ts";
 import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
-import nullThrows from "https://esm.sh/nullthrows";
 import { requireAuth } from "../_shared/auth.ts";
 import { cors } from "../_shared/cors.ts";
 import parseJSON from "../_shared/json.ts";
@@ -106,7 +104,10 @@ const handler = async (context: AuthenticatedRequestContext) => {
   try {
     const { experiment, createdItems } = await createExperiment(context);
 
-    // start background task here
+    // TODO(Mo): kick off web scraping here
+    // Some notes:
+    // - the experiment was created with status "submitted" above
+    // - we should update the status once the web scraping finishes
 
     return jsonResponse({ success: true, ...experiment, items: createdItems });
   } catch (error) {
