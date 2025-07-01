@@ -127,7 +127,6 @@ export const Dashboard = () => {
               { id: "overview", label: "Overview" },
               { id: "experiments", label: "Experiments" },
               { id: "upload", label: "Upload BoM" },
-              { id: "analysis", label: "Cost Analysis" },
             ].map((tab) => (
               <button
                 key={tab.id}

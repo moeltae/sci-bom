@@ -24,7 +24,7 @@ model Experiment {
   id               String           @id @default(cuid())
   name             String
   description      String
-  status           ExperimentStatus @default(draft)
+  status           ExperimentStatus @default(submitted)
   estimatedCostUSD Float
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -52,7 +52,8 @@ model Item {
 }
 
 enum ExperimentStatus {
-  draft
-  active
+  submitted
+  analyzing
   completed
+  failed
 }
