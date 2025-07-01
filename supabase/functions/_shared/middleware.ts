@@ -1,9 +1,21 @@
+import { requireAuth } from "./auth.ts";
+import { cors } from "./cors.ts";
+import parseJSON from "./json.ts";
+import { withSupabase } from "./supabase.ts";
+import {
+  SupabaseClient,
+  type User,
+} from "https://esm.sh/@supabase/supabase-js@2";
+
 export interface RequestContext {
   request: Request;
-  user?: Record<string, unknown>;
   params?: Record<string, string>;
-  supabase?: Record<string, unknown>;
-  userSupabase?: Record<string, unknown>;
+  body?: any;
+}
+
+export interface AuthenticatedRequestContext extends RequestContext {
+  user: User;
+  userSupabase: SupabaseClient;
 }
 
 export type MiddlewareHandler = (
@@ -15,12 +27,11 @@ export type Handler = (context: RequestContext) => Promise<Response>;
 export async function getContext(
   request: Request,
   middlewares: MiddlewareHandler[]
-): Promise<RequestContext | Response> {
+): Promise<RequestContext> {
   let context: RequestContext = { request };
 
   for (const middleware of middlewares) {
     const result = await middleware(context);
-    // TODO: put this back
     if (result instanceof Response) {
       console.log(`Early exit from ${middleware.name}`);
       return result; // Early return for auth failures, etc.
@@ -31,20 +42,16 @@ export async function getContext(
   return context;
 }
 
-export const compose = (...middlewares: MiddlewareHandler[]) => {
-  return async (handler: Handler) => {
-    return async (request: Request) => {
-      let context: RequestContext = { request };
+export async function getAuthenticatedContext(
+  request: Request
+): Promise<AuthenticatedRequestContext> {
+  const context = await getContext(request, [
+    cors,
+    parseJSON,
+    withSupabase,
+    requireAuth,
+  ]);
 
-      for (const middleware of middlewares) {
-        const result = await middleware(context);
-        if (result instanceof Response) {
-          return result; // Early return for auth failures, etc.
-        }
-        context = result;
-      }
-
-      return handler(context);
-    };
-  };
-};
+  // TODO: Type this better
+  return context as AuthenticatedRequestContext;
+}

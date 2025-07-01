@@ -11,10 +11,10 @@ import { requireAuth } from "../_shared/auth.ts";
 
 const handler = async (context) => {
   try {
-    const { supabase, user } = context;
+    const { user, userSupabase } = context;
 
     // Query experiments for the current user
-    const { data: experiments, error } = await context.userSupabase
+    const { data: experiments, error } = await userSupabase
       .from("experiments")
       .select(
         `
