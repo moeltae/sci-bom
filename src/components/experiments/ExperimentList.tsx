@@ -75,7 +75,7 @@ export const ExperimentList = () => {
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-600">
-                    {experiment.createdAt.toLocaleDateString()}
+                    {new Date(experiment.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
