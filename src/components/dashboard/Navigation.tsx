@@ -2,10 +2,6 @@ import DashboardTab from "./DashboardTab";
 
 const tabs = [
   {
-    id: DashboardTab.Overview,
-    label: "Overview",
-  },
-  {
     id: DashboardTab.Experiments,
     label: "Experiments",
   },

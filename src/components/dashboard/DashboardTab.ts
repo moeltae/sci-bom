@@ -1,5 +1,4 @@
 enum DashboardTab {
-  Overview = "Overview",
   Experiments = "Experiments",
   Create = "Create",
 }
