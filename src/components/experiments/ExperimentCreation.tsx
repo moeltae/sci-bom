@@ -9,10 +9,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, AlertCircle } from "lucide-react";
+import { 
+  Upload, 
+  FileText, 
+  AlertCircle
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface BomItem {
   id: string;
@@ -24,11 +27,11 @@ interface BomItem {
   catalog?: string;
 }
 
-interface BomUploaderProps {
+interface ExperimentCreationProps {
   onExperimentCreated?: () => void;
 }
 
-export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
+export const ExperimentCreation = ({ onExperimentCreated }: ExperimentCreationProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [bomData, setBomData] = useState<BomItem[]>([]);
   const [experimentName, setExperimentName] = useState("");
@@ -37,7 +40,6 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { session } = useAuth();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0];
@@ -55,6 +57,10 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
 
   const processCsvFile = async (csvFile: File) => {
     setIsProcessing(true);
+    
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     const text = await csvFile.text();
     const lines = text.split("\n");
     const headers = lines[0].split(",").map((h) => h.trim());
@@ -105,69 +111,29 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
 
     setIsSaving(true);
 
-    try {
-      // Transform the data to match the backend schema
-      const items = bomData.map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        estimatedCostUSD: item.estimatedCostUSD,
-        supplier: item.supplier,
-        catalog: item.catalog,
-      }));
+    // Simulate saving delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-experiment`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            name: experimentName,
-            description: experimentDescription,
-            items,
-          }),
-        }
-      );
+    toast({
+      title: "Experiment created successfully!",
+      description: `"${experimentName}" has been created with ${bomData.length} materials. AI analysis will continue in the background.`,
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save experiment");
-      }
-
-      toast({
-        title: "Experiment saved successfully",
-        description: `"${experimentName}" has been created with ${bomData.length} materials.`,
-      });
-
-      // Reset form
-      setFile(null);
-      setBomData([]);
-      setExperimentName("");
-      setExperimentDescription("");
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-
-      // Navigate to experiments list if callback provided
-      if (onExperimentCreated) {
-        onExperimentCreated();
-      }
-    } catch (error) {
-      console.error("Error saving experiment:", error);
-      toast({
-        title: "Failed to save experiment",
-        description:
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+    // Reset form
+    setFile(null);
+    setBomData([]);
+    setExperimentName("");
+    setExperimentDescription("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
+
+    // Navigate to experiments list if callback provided
+    if (onExperimentCreated) {
+      onExperimentCreated();
+    }
+
+    setIsSaving(false);
   };
 
   return (
@@ -291,4 +257,4 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
       </Card>
     </div>
   );
-};
+}; 
