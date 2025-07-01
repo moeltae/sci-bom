@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { BomUploader } from "@/components/bom/BomUploader";
 import { ExperimentList } from "@/components/experiments/ExperimentList";
-import { CostAnalysis } from "@/components/analysis/CostAnalysis";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -218,7 +217,6 @@ export const Dashboard = () => {
 
         {activeTab === "experiments" && <ExperimentList />}
         {activeTab === "upload" && <BomUploader />}
-        {activeTab === "analysis" && <CostAnalysis />}
       </main>
     </div>
   );
