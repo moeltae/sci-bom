@@ -84,7 +84,7 @@ export const useExperiments = (): UseExperimentsReturn => {
     } else {
       setLoading(false);
     }
-  }, [session?.access_token, fetchExperiments]);
+  }, [session?.access_token]);
 
   return {
     experiments,
