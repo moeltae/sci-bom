@@ -171,47 +171,6 @@ export const Dashboard = () => {
                 </Card>
               ))}
             </div>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>
-                  Your latest experiments and updates
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">
-                        New experiment "CRISPR Gene Editing" created
-                      </p>
-                      <p className="text-xs text-gray-500">2 hours ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">
-                        Materials updated for "Protein Purification"
-                      </p>
-                      <p className="text-xs text-gray-500">1 day ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">
-                        Cost analysis completed for "Cell Culture"
-                      </p>
-                      <p className="text-xs text-gray-500">3 days ago</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         )}
 
