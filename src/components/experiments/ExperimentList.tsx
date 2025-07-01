@@ -12,6 +12,7 @@ import type {
   Experiment,
   ExperimentStatus,
 } from "../../../generated/prisma/index-browser";
+import { useExperiments } from "@/hooks/use-experiments";
 
 const getStatusColor = (status: ExperimentStatus) => {
   switch (status) {
@@ -27,6 +28,10 @@ const getStatusColor = (status: ExperimentStatus) => {
 };
 
 export const ExperimentList = () => {
+  const { experiments, loading, error, refetch } = useExperiments();
+
+  console.log(experiments, loading, error);
+
   return (
     <div className="space-y-6">
       <div>
@@ -39,7 +44,7 @@ export const ExperimentList = () => {
       </div>
 
       <div className="grid gap-6">
-        {mockExperiments.map((experiment) => (
+        {experiments.map((experiment) => (
           <Card
             key={experiment.id}
             className="hover:shadow-md transition-shadow"

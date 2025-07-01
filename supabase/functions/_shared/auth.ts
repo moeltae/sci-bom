@@ -6,7 +6,8 @@ export const requireAuth: MiddlewareHandler = async (context) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const supabase = context.supabase;
+  // Use the userSupabase client if available, otherwise fall back to the service role client
+  const supabase = context.userSupabase || context.supabase;
 
   const {
     data: { user },

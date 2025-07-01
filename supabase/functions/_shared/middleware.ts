@@ -3,6 +3,7 @@ export interface RequestContext {
   user?: Record<string, unknown>;
   params?: Record<string, string>;
   supabase?: Record<string, unknown>;
+  userSupabase?: Record<string, unknown>;
 }
 
 export type MiddlewareHandler = (

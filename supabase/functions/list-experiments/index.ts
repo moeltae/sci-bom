@@ -14,7 +14,7 @@ const handler = async (context) => {
     const { supabase, user } = context;
 
     // Query experiments for the current user
-    const { data: experiments, error } = await supabase
+    const { data: experiments, error } = await context.userSupabase
       .from("experiments")
       .select(
         `
