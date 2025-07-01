@@ -9,6 +9,8 @@ import NotFound from "./pages/NotFound";
 import { Demo } from "./pages/Demo";
 import Account from "./pages/Account";
 import ErrorBoundary from "./components/ui/error-boundary";
+import AuthPage from "./pages/Auth";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -23,8 +25,16 @@ const App = () => (
             <Route
               path="/"
               element={
-                <ErrorBoundary>
+                <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/auth"
+              element={
+                <ErrorBoundary>
+                  <AuthPage />
                 </ErrorBoundary>
               }
             />
@@ -39,9 +49,9 @@ const App = () => (
             <Route
               path="/account"
               element={
-                <ErrorBoundary>
+                <ProtectedRoute>
                   <Account />
-                </ErrorBoundary>
+                </ProtectedRoute>
               }
             />
             <Route
