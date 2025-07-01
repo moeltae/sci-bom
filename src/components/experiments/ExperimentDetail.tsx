@@ -56,7 +56,7 @@ export const ExperimentDetail = ({
   experiment,
   onClose,
 }: ExperimentDetailProps) => {
-  const [activeTab, setActiveTab] = useState(DashboardTab.Experiments);
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Use real experiment items, with fallback to empty array if items not loaded
   const items = experiment.items || [];
