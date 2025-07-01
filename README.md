@@ -79,7 +79,7 @@ The main app uses the `BomUploader` component which has full backend integration
 
 For enhanced UI demonstrations:
 1. Start the development server: `bun run dev`
-2. Navigate to `http://localhost:5173/demo`
+2. Navigate to `http://localhost:8080/demo`
 3. Or click "View UI Demo" on the login page
 4. Experience the enhanced UI mock that matches the real interface
 
