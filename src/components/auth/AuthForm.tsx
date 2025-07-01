@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import formatError from "@/lib/formatError";
 
 interface AuthFormProps {
   onAuthenticated: () => void;
@@ -62,25 +63,29 @@ export const AuthForm = ({ onAuthenticated }: AuthFormProps) => {
     setIsLoading(true);
 
     try {
-      const { error, data } = await signUp(email, password, name);
+      const { error, data } = await signUp(email, password, name, institution);
+      console.log(error, data);
 
-      if (error || data.user == null) {
+      if (error) {
         toast({
           title: "Sign up failed",
-          description: error.message,
+          description: formatError(error),
           variant: "destructive",
         });
       } else {
         toast({
           title: "Account created!",
-          description: "Please check your email to verify your account.",
+          description: "Welcome! Your account has been created successfully.",
         });
-        // Note: User will need to verify email before they can sign in
+        if (data.session) {
+          onAuthenticated();
+        }
       }
     } catch (error) {
+      console.log(error);
       toast({
         title: "Sign up failed",
-        description: "An unexpected error occurred.",
+        description: formatError(error),
         variant: "destructive",
       });
     } finally {

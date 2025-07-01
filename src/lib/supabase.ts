@@ -21,7 +21,8 @@ export const auth = {
   signUp: async (
     email: string,
     password: string,
-    name: string
+    name: string,
+    institution: string
   ): Promise<{ data: AuthResponse["data"]; error: AuthError | null }> => {
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/signup`,
@@ -35,6 +36,7 @@ export const auth = {
           email,
           password,
           name,
+          institution,
         }),
       }
     );
@@ -45,6 +47,17 @@ export const auth = {
     }
 
     const { data, error } = await response.json();
+
+    // If we have session data from the Edge Function, set it in the Supabase client
+    if (data?.session) {
+      const { error: setSessionError } = await supabase.auth.setSession(
+        data.session
+      );
+      if (setSessionError) {
+        console.error("Failed to set session:", setSessionError);
+        return { data: null, error: setSessionError };
+      }
+    }
 
     return { data, error };
   },

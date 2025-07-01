@@ -18,10 +18,11 @@ export async function getContext(
 
   for (const middleware of middlewares) {
     const result = await middleware(context);
-    if (result instanceof Response) {
-      console.log(`Early exit from ${middleware.name}`);
-      return result; // Early return for auth failures, etc.
-    }
+    // TODO: put this back in
+    // if (result instanceof Response) {
+    //   console.log(`Early exit from ${middleware.name}`);
+    //   return result; // Early return for auth failures, etc.
+    // }
     context = { ...context, ...result };
   }
 

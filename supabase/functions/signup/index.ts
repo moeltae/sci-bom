@@ -10,34 +10,41 @@ import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
 
 const handler = async (context) => {
   // Extract data from the parsed JSON body
-  const { email, name, password } = context.body;
+  const { email, name, password, institution } = context.body;
 
   // Validate required fields
-  if (!email || !name || !password) {
+  if (!email || !name || !password || !institution) {
     return errorResponse(
       "Missing required fields: id, email, name, password",
       400
     );
   }
 
-  // Create the user in supabase auth
-  const { data, authError } = await context.supabase.auth.signUp({
-    email,
-    password,
-  });
+  // Create the user in supabase auth with session data
+  const { data: authData, error: authError } =
+    await context.supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name,
+        },
+      },
+    });
 
   if (authError) {
     return errorResponse(authError.message);
   }
 
   // Create the user record
-  const { error } = await context.supabase.from("users").upsert([
+  const { userData, error } = await context.supabase.from("users").upsert([
     {
-      id: data.user.id,
+      id: authData.user.id,
       email,
       name,
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
+      institution,
     },
   ]);
 
@@ -45,14 +52,16 @@ const handler = async (context) => {
     return errorResponse(error.message);
   }
 
-  return jsonResponse({ success: true });
+  // Return session data along with user data
+  return jsonResponse({
+    user: userData,
+    session: authData.session,
+    success: true,
+  });
 };
 
 serve(async (request: Request) => {
-  console.log("x0");
   const context = await getContext(request, [cors, parseJSON, withSupabase]);
-  console.log("context keys:", Object.keys(context));
-  console.log("context:", context);
 
   if (context instanceof Response) {
     return context;
