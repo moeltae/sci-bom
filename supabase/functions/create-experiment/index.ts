@@ -104,11 +104,10 @@ const handler = async (context: AuthenticatedRequestContext) => {
   try {
     const { experiment, createdItems } = await createExperiment(context);
 
-    // TODO(Mo): kick off web scraping here
+    // TODO(Mo): I think we should kick off web scraping here
     // Some notes:
     // - the experiment was created with status "submitted" above
     // - we should update the status once the web scraping finishes
-
     return jsonResponse({ success: true, ...experiment, items: createdItems });
   } catch (error) {
     console.error("Unexpected error:", error);
