@@ -1,0 +1,22 @@
+{
+  "name": "bom-processor-worker",
+  "version": "1.0.0",
+  "description": "Worker for processing BOM jobs from Redis queue",
+  "main": "bom-processor.js",
+  "scripts": {
+    "start": "node bom-processor.js",
+    "dev": "nodemon bom-processor.js"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.28.4",
+    "@supabase/supabase-js": "^2.50.2",
+    "openai": "^4.28.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 

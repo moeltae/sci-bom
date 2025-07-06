@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -9,10 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, AlertCircle } from "lucide-react";
+import { Upload, FileText, AlertCircle, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
+import { Progress } from "@/components/ui/progress";
 
 interface BomItem {
   id: string;
@@ -28,6 +29,13 @@ interface BomUploaderProps {
   onExperimentCreated?: () => void;
 }
 
+interface JobStatus {
+  jobId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  result?: any;
+  error?: string;
+}
+
 export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [bomData, setBomData] = useState<BomItem[]>([]);
@@ -35,9 +43,20 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
   const [experimentDescription, setExperimentDescription] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { session } = useAuth();
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0];
@@ -84,6 +103,104 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
     });
   };
 
+  const submitBomJob = async () => {
+    if (!file) {
+      toast({
+        title: "No file selected",
+        description: "Please upload a CSV file first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const csvText = await file.text();
+      
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          csv: csvText,
+          email: session?.user?.email || 'anonymous@example.com',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit BOM job');
+      }
+
+      const result = await response.json();
+      setJobStatus({
+        jobId: result.jobId,
+        status: result.status,
+      });
+
+      toast({
+        title: "BOM job submitted",
+        description: "Your BOM is being processed. You'll be notified when it's ready.",
+      });
+
+      // Start polling for status updates
+      startPolling(result.jobId);
+
+    } catch (error) {
+      console.error('Error submitting BOM job:', error);
+      toast({
+        title: "Failed to submit BOM job",
+        description: error instanceof Error ? error.message : "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const startPolling = (jobId: string) => {
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/bom/${jobId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setJobStatus({
+            jobId: data.jobId,
+            status: data.status,
+            result: data.result,
+            error: data.error,
+          });
+
+          // Stop polling if job is completed or failed
+          if (data.status === 'completed' || data.status === 'failed') {
+            clearInterval(interval);
+            setPollingInterval(null);
+
+            if (data.status === 'completed') {
+              toast({
+                title: "BOM processing completed",
+                description: "Your materials have been analyzed successfully!",
+              });
+            } else {
+              toast({
+                title: "BOM processing failed",
+                description: "There was an error processing your BOM. Please try again.",
+                variant: "destructive",
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error polling job status:', error);
+      }
+    }, 3000); // Poll every 3 seconds
+
+    setPollingInterval(interval);
+  };
+
   const handleSaveBom = async () => {
     if (!experimentName.trim()) {
       toast({
@@ -103,19 +220,19 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
       return;
     }
 
+    // If we have processed results, use them; otherwise use the original parsed data
+    const materialsToSave = jobStatus?.result || bomData.map(item => ({
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      estimatedCostUSD: item.estimatedCostUSD,
+      supplier: item.supplier,
+      catalog: item.catalog,
+    }));
+
     setIsSaving(true);
 
     try {
-      // Transform the data to match the backend schema
-      const items = bomData.map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        estimatedCostUSD: item.estimatedCostUSD,
-        supplier: item.supplier,
-        catalog: item.catalog,
-      }));
-
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-experiment`,
         {
@@ -128,7 +245,7 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
           body: JSON.stringify({
             name: experimentName,
             description: experimentDescription,
-            items,
+            items: materialsToSave,
           }),
         }
       );
@@ -140,7 +257,7 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
 
       toast({
         title: "Experiment saved successfully",
-        description: `"${experimentName}" has been created with ${bomData.length} materials.`,
+        description: `"${experimentName}" has been created with ${materialsToSave.length} materials.`,
       });
 
       // Reset form
@@ -148,6 +265,7 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
       setBomData([]);
       setExperimentName("");
       setExperimentDescription("");
+      setJobStatus(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -171,6 +289,40 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
     }
   };
 
+  const getStatusIcon = () => {
+    if (!jobStatus) return null;
+    
+    switch (jobStatus.status) {
+      case 'pending':
+        return <Loader2 className="h-4 w-4 animate-spin" />;
+      case 'processing':
+        return <Loader2 className="h-4 w-4 animate-spin" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'failed':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusText = () => {
+    if (!jobStatus) return '';
+    
+    switch (jobStatus.status) {
+      case 'pending':
+        return 'Job queued, waiting to start...';
+      case 'processing':
+        return 'Processing your BOM with AI...';
+      case 'completed':
+        return 'Processing completed successfully!';
+      case 'failed':
+        return 'Processing failed. Please try again.';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -178,7 +330,7 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
           <CardTitle>Upload Bill of Materials</CardTitle>
           <CardDescription>
             Import your experiment materials from a CSV file to get started with
-            cost analysis
+            AI-powered cost analysis
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -234,7 +386,7 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
             </Alert>
           </div>
 
-          {bomData.length > 0 && (
+          {bomData.length > 0 && !jobStatus && (
             <div className="space-y-4">
               <h3 className="text-lg font-medium">
                 Preview Materials ({bomData.length} items)
@@ -273,19 +425,91 @@ export const BomUploader = ({ onExperimentCreated }: BomUploaderProps) => {
 
               <div className="flex justify-end">
                 <Button
-                  onClick={handleSaveBom}
-                  disabled={
-                    isProcessing ||
-                    isSaving ||
-                    !experimentName.trim() ||
-                    !experimentDescription.trim()
-                  }
+                  onClick={submitBomJob}
+                  disabled={isProcessing || isSaving}
                   className="flex items-center gap-2"
                 >
                   <FileText className="h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save Experiment BoM"}
+                  {isSaving ? "Submitting..." : "Process with AI"}
                 </Button>
               </div>
+            </div>
+          )}
+
+          {jobStatus && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 p-4 border rounded-lg">
+                {getStatusIcon()}
+                <div className="flex-1">
+                  <p className="font-medium">Job Status: {jobStatus.status}</p>
+                  <p className="text-sm text-gray-600">{getStatusText()}</p>
+                </div>
+              </div>
+
+              {jobStatus.status === 'processing' && (
+                <Progress value={50} className="w-full" />
+              )}
+
+              {jobStatus.status === 'completed' && jobStatus.result && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">
+                    AI Analysis Results ({jobStatus.result.length} items)
+                  </h3>
+                  <div className="max-h-64 overflow-y-auto border rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="border-b bg-gray-50">
+                        <tr>
+                          <th className="text-left p-3">Material</th>
+                          <th className="text-left p-3">Quantity</th>
+                          <th className="text-left p-3">Unit</th>
+                          <th className="text-left p-3">Est. Cost</th>
+                          <th className="text-left p-3">Supplier</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {jobStatus.result.slice(0, 5).map((item: any, index: number) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-3 font-medium">{item.name}</td>
+                            <td className="p-3">{item.quantity}</td>
+                            <td className="p-3">{item.unit}</td>
+                            <td className="p-3">
+                              {item.estimatedCostUSD
+                                ? `$${item.estimatedCostUSD.toFixed(2)}`
+                                : "TBD"}
+                            </td>
+                            <td className="p-3">{item.supplier || "TBD"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {jobStatus.result.length > 5 && (
+                      <div className="p-3 text-center text-gray-500 border-t bg-gray-50">
+                        ... and {jobStatus.result.length - 5} more items
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleSaveBom}
+                      disabled={isSaving || !experimentName.trim() || !experimentDescription.trim()}
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="h-4 w-4" />
+                      {isSaving ? "Saving..." : "Save Experiment"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {jobStatus.status === 'failed' && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Failed to process BOM: {jobStatus.error || 'Unknown error'}
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           )}
         </CardContent>
